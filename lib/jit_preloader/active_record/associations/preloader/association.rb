@@ -19,11 +19,13 @@ module JitPreloader
 
     def run
       if !preload_scope || preload_scope.empty_scope?
+        all_records = []
         owners.each do |owner|
           owned_records = records_by_owner[owner] || []
           all_records.concat(Array(owned_records)) if owner.jit_preloader || JitPreloader.globally_enabled?
           associate_records_to_owner(owner, owned_records)
         end
+        JitPreloader::Preloader.attach(all_records) if all_records.any?
       else
         # Custom preload scope is used and
         # the association can not be marked as loaded
