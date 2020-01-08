@@ -45,21 +45,15 @@ module JitPreloader
     #     association.target = records.first unless records.empty?
     #   end
     # end
+
     def associate_records_to_owner(owner, records)
       association = owner.association(reflection.name)
-      association.loaded!
-
       if reflection.collection?
-        # It is possible that some of the records are loaded already.
-        # We don't want to duplicate them, but we also want to preserve
-        # the original copy so that we don't blow away in-memory changes.
-        new_records = association.target.any? ? records - association.target : records
-        association.target.concat(new_records)
+        association.target ||= records
       else
-        association.target ||= records.first unless records.empty?
+        association.target ||= records.first
       end
     end
-
 
     def build_scope
       super.tap do |scope|
